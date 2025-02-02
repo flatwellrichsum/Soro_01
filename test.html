@@ -5,43 +5,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Random Number UI</title>
     <style>
+        body {
+            background: #f1f2f6;
+            font-family: Meiryo, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: black;
+        }
         .container {
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
+            background: #f1f2f6;
+            border-radius: 20px;
         }
         .number-display {
             font-size: 2rem;
             font-weight: bold;
             padding: 20px;
-            background-color: #e0e0e0;
+            background: #f1f2f6;
             border-radius: 10px;
         }
-        .grid {
+        .lower-container {
+            display: flex;
+            margin-top: 20px;
+            gap: 20px;
+        }
+        .left-grid {
             display: grid;
             grid-template-rows: repeat(5, 1fr);
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
-            margin-top: 20px;
+            position: relative;
+        }
+        .left-grid::after {
+            content: "";
+            position: absolute;
+            top: 20%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #cccccc;
+        }
+        .right-grid {
+            display: grid;
+            grid-template-rows: 1fr 4fr;
+            grid-template-columns: 1fr;
+            gap: 10px;
         }
         .button {
-            width: 100px;
-            height: 50px;
-            border-radius: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
             border: none;
             cursor: pointer;
-            transition: background-color 0.2s;
+            background: #f1f2f6;
+            box-shadow: 5px 5px 10px #d1d2d6, -5px -5px 10px #ffffff;
+            transition: all 0.2s;
         }
-        .red { background-color: red; }
-        .yellow { background-color: yellow; }
-        .white { background-color: white; }
+        .square-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            // background: #80bfff;
+        }
+        .tall-button {
+            width: 60px;
+            height: 240px;
+            border-radius: 15px;
+            // background: #80bfff;
+        }
+        .button.on {
+            box-shadow: inset 5px 5px 10px #d1d2d6, inset -5px -5px 10px #ffffff;
+        }
+        // .left-grid .button.on:nth-child(-n+2) {
+        //     background: #ff8080;
+        // }
+        // .left-grid .button.on:nth-child(n+3) {
+        //    background: #ffbf80;
+        // }
     </style>
 </head>
 <body>
     <div class="container">
         <div id="random-number" class="number-display"></div>
-        <div class="grid" id="button-grid"></div>
+        <div class="lower-container">
+            <div class="left-grid" id="button-grid"></div>
+            <div class="right-grid" id="right-button-grid"></div>
+        </div>
     </div>
 
     <script>
@@ -49,14 +104,8 @@
             return Math.floor(Math.random() * 90) + 10;
         }
         
-        function toggleColor(button) {
-            if (button.classList.contains("white")) {
-                button.classList.remove("white");
-                button.classList.add(button.dataset.originalColor);
-            } else {
-                button.classList.remove("red", "yellow");
-                button.classList.add("white");
-            }
+        function toggleState(button) {
+            button.classList.toggle("on");
         }
         
         document.addEventListener("DOMContentLoaded", function () {
@@ -66,12 +115,22 @@
             for (let row = 0; row < 5; row++) {
                 for (let col = 0; col < 2; col++) {
                     const button = document.createElement("button");
-                    button.classList.add("button", row === 0 ? "red" : "yellow");
-                    button.dataset.originalColor = row === 0 ? "red" : "yellow";
-                    button.addEventListener("click", function () { toggleColor(button); });
+                    button.classList.add("button");
+                    button.addEventListener("click", function () { toggleState(button); });
                     grid.appendChild(button);
                 }
             }
+            
+            const rightGrid = document.getElementById("right-button-grid");
+            const squareButton = document.createElement("button");
+            squareButton.classList.add("button", "square-button");
+            squareButton.addEventListener("click", function () { toggleState(squareButton); });
+            rightGrid.appendChild(squareButton);
+            
+            const tallButton = document.createElement("button");
+            tallButton.classList.add("button", "tall-button");
+            tallButton.addEventListener("click", function () { toggleState(tallButton); });
+            rightGrid.appendChild(tallButton);
         });
     </script>
 </body>
