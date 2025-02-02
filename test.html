@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Number UI</title>
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .number-display {
+            font-size: 2rem;
+            font-weight: bold;
+            padding: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+        }
+        .grid {
+            display: grid;
+            grid-template-rows: repeat(5, 1fr);
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .button {
+            width: 100px;
+            height: 50px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .red { background-color: red; }
+        .yellow { background-color: yellow; }
+        .white { background-color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="random-number" class="number-display"></div>
+        <div class="grid" id="button-grid"></div>
+    </div>
+
+    <script>
+        function getRandomNumber() {
+            return Math.floor(Math.random() * 90) + 10;
+        }
+        
+        function toggleColor(button) {
+            if (button.classList.contains("white")) {
+                button.classList.remove("white");
+                button.classList.add(button.dataset.originalColor);
+            } else {
+                button.classList.remove("red", "yellow");
+                button.classList.add("white");
+            }
+        }
+        
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("random-number").textContent = getRandomNumber();
+            
+            const grid = document.getElementById("button-grid");
+            for (let row = 0; row < 5; row++) {
+                for (let col = 0; col < 2; col++) {
+                    const button = document.createElement("button");
+                    button.classList.add("button", row === 0 ? "red" : "yellow");
+                    button.dataset.originalColor = row === 0 ? "red" : "yellow";
+                    button.addEventListener("click", function () { toggleColor(button); });
+                    grid.appendChild(button);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
