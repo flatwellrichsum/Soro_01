@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>タップで色が変わるボタン</title>
+    <title>そろばん</title>
     <style>
         body {
             display: flex;
@@ -11,53 +11,128 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-color: #f0f0f0;
+            background-color: #f1f2f6;
+            font-family: sans-serif;
         }
-        .button {
-            width: 100px;
-            height: 100px;
+        #area_num {
+            width: 120px;
+            height: 50px;
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: black;
+            background-color: #f1f2f6;
+            margin-bottom: 10px;
+        }
+        #area_beads {
+            display: flex;
+        }
+        #area_main {
+            display: grid;
+            grid-template-columns: repeat(2, 50px);
+            grid-template-rows: repeat(5, 50px);
+            gap: 5px 0;
+        }
+        .button_main {
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             border: none;
-            margin: 20px;
             font-size: 16px;
             font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s;
+            background-color: #f1f2f6;
+            box-shadow: inset 2px 2px 5px #ccc, inset -2px -2px 5px #fff;
         }
-        .blue {
-            background-color: blue;
-            color: white;
+        .button_main.on {
+            box-shadow: inset -2px -2px 5px #ccc, inset 2px 2px 5px #fff;
         }
-        .red {
-            background-color: red;
+        .button_main.left.on:nth-child(1) {
+            background-color: #ff8080;
+        }
+        .button_main.left.on:nth-child(n+2) {
+            background-color: #ffbf80;
+        }
+        #area_utility {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-left: 20px;
+        }
+        .button_utility {
+            background-color: #80bfff;
             color: white;
+            border: none;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+        #button_reset {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        #button_enter {
+            width: 50px;
+            height: 100px;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
-    <button id="button1" class="button blue">ボタン1</button>
-    <button id="button2" class="button blue">ボタン2</button>
-
+    <div id="area_num">00</div>
+    <div id="area_beads">
+        <div id="area_main">
+            <script>
+                for (let i = 0; i < 10; i++) {
+                    let btn = document.createElement("button");
+                    btn.classList.add("button_main", i < 5 ? "left" : "right");
+                    btn.dataset.index = i;
+                    document.getElementById("area_main").appendChild(btn);
+                }
+            </script>
+        </div>
+        <div id="area_utility">
+            <button id="button_reset" class="button_utility">C</button>
+            <button id="button_enter" class="button_utility">✓</button>
+        </div>
+    </div>
     <script>
-        function toggleColor(button) {
-            if (button.classList.contains('blue')) {
-                button.classList.remove('blue');
-                button.classList.add('red');
-            } else {
-                button.classList.remove('red');
-                button.classList.add('blue');
-            }
+        document.querySelectorAll(".button_main").forEach(button => {
+            button.addEventListener("pointerdown", function(event) {
+                event.preventDefault();
+                let index = Number(this.dataset.index);
+                let left = this.classList.contains("left");
+                let buttons = document.querySelectorAll(left ? ".button_main.left" : ".button_main.right");
+                if (index % 5 === 0) {
+                    this.classList.toggle("on");
+                } else {
+                    let turnOn = !this.classList.contains("on");
+                    for (let i = 1; i < 5; i++) {
+                        if (index % 5 < i) break;
+                        buttons[i].classList.toggle("on", turnOn);
+                    }
+                }
+                updateNumber();
+            });
+        });
+        document.getElementById("button_reset").addEventListener("pointerdown", event => {
+            event.preventDefault();
+            document.querySelectorAll(".button_main").forEach(b => b.classList.remove("on"));
+            updateNumber();
+        });
+        function updateNumber() {
+            let num = 0;
+            document.querySelectorAll(".button_main.on").forEach(button => {
+                let index = Number(button.dataset.index);
+                if (index % 5 === 0) {
+                    num += (index < 5) ? 50 : 5;
+                } else {
+                    num += (index < 5) ? 10 : 1;
+                }
+            });
+            document.getElementById("area_num").textContent = String(num).padStart(2, "0");
         }
-
-        document.getElementById('button1').addEventListener('pointerdown', function(event) {
-            event.preventDefault();
-            toggleColor(this);
-        });
-
-        document.getElementById('button2').addEventListener('pointerdown', function(event) {
-            event.preventDefault();
-            toggleColor(this);
-        });
     </script>
 </body>
 </html>
