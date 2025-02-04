@@ -98,30 +98,44 @@
         </div>
     </div>
     <script>
+        let activeTouches = {};
+        
         document.querySelectorAll(".button_main").forEach(button => {
             button.addEventListener("pointerdown", function(event) {
                 event.preventDefault();
-                let index = Number(this.dataset.index);
-                let left = this.classList.contains("left");
-                let buttons = Array.from(document.querySelectorAll(left ? ".button_main.left" : ".button_main.right"));
-                if (index % 5 === 0) {
-                    this.classList.toggle("on");
-                } else {
-                    let turnOn = !this.classList.contains("on");
-                    buttons.forEach((btn, i) => {
-                        if (i >= 1 && i <= index % 5) {
-                            btn.classList.toggle("on", turnOn);
-                        }
-                    });
-                }
-                updateNumber();
+                let pointerId = event.pointerId;
+                activeTouches[pointerId] = this;
+                handleButtonToggle(this);
+            });
+            
+            button.addEventListener("pointerup", function(event) {
+                delete activeTouches[event.pointerId];
             });
         });
+        
         document.getElementById("button_reset").addEventListener("pointerdown", event => {
             event.preventDefault();
             document.querySelectorAll(".button_main").forEach(b => b.classList.remove("on"));
             updateNumber();
         });
+        
+        function handleButtonToggle(button) {
+            let index = Number(button.dataset.index);
+            let left = button.classList.contains("left");
+            let buttons = Array.from(document.querySelectorAll(left ? ".button_main.left" : ".button_main.right"));
+            if (index % 5 === 0) {
+                button.classList.toggle("on");
+            } else {
+                let turnOn = !button.classList.contains("on");
+                buttons.forEach((btn, i) => {
+                    if (i >= 1 && i <= index % 5) {
+                        btn.classList.toggle("on", turnOn);
+                    }
+                });
+            }
+            updateNumber();
+        }
+        
         function updateNumber() {
             let num = 0;
             document.querySelectorAll(".button_main.on").forEach(button => {
