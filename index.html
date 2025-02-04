@@ -103,15 +103,16 @@
                 event.preventDefault();
                 let index = Number(this.dataset.index);
                 let left = this.classList.contains("left");
-                let buttons = document.querySelectorAll(left ? ".button_main.left" : ".button_main.right");
+                let buttons = Array.from(document.querySelectorAll(left ? ".button_main.left" : ".button_main.right"));
                 if (index % 5 === 0) {
                     this.classList.toggle("on");
                 } else {
                     let turnOn = !this.classList.contains("on");
-                    for (let i = 1; i < 5; i++) {
-                        if (index % 5 < i) break;
-                        buttons[i].classList.toggle("on", turnOn);
-                    }
+                    buttons.forEach((btn, i) => {
+                        if (i >= 1 && i <= index % 5) {
+                            btn.classList.toggle("on", turnOn);
+                        }
+                    });
                 }
                 updateNumber();
             });
