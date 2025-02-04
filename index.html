@@ -3,198 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>そろばんUI</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/alloyfinger/0.1.15/alloy_finger.min.js"></script>
+    <title>タップで色が変わるボタン</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background: #f1f2f6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .container { 
-            text-align: center; 
-            width: 220px;
-        }
-
-        /* 数値表示エリア */
-        .display {
-            width: 100%;
-            padding: 10px;
-            background: #f1f2f6;
-            font-size: 2.5em;
-            font-weight: bold;
-            color: black;
-            text-align: center;
-            box-sizing: border-box;
-        }
-
-        /* 下部エリア */
-        .control {
-            display: flex;
-            justify-content: center;
-            align-items: stretch;
-            gap: 0spx;
-            height: 260px; /* 左右エリアを同じ高さに */
-        }
-
-        /* そろばんエリア */
-        .soroban {
-            display: grid;
-            gap: 5px;
-            flex: 1;
-        }
-
-        .bead_button {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #f1f2f6;
-            border: none;
-            box-shadow: 4px 4px 8px #ccc, -4px -4px 8px white;
-            transition: 0.2s;
-        }
-        .bead_button.on { background: #ff8080; box-shadow: inset 4px 4px 8px #ccc, inset -4px -4px 8px white; }
-        .bead_button.lower.on { background: #ffbf80; }
-
-        .separator { height: 4px; background: #ccc; width: 100%; }
-
-        /* 右側ボタン */
-        .buttons {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            flex: 0.8;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
         }
-
-        .action_button {
-            width: 60px;
-            background: #80bfff;
-            border-radius: 10px;
+        .button {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
             border: none;
-            box-shadow: 4px 4px 8px #ccc, -4px -4px 8px white;
-            font-size: 1.5em;
-            color: white;
-            font-family: "Arial", sans-serif;
-            font-weight: 300;
+            margin: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
-        .reset { height: 40px; }
-        .enter { height: 200px; }
-
-        .action_button:active {
-            box-shadow: inset 4px 4px 8px #ccc, inset -4px -4px 8px white;
+        .blue {
+            background-color: blue;
+            color: white;
+        }
+        .red {
+            background-color: red;
+            color: white;
         }
     </style>
 </head>
 <body>
+    <button id="button1" class="button blue">ボタン1</button>
+    <button id="button2" class="button blue">ボタン2</button>
 
-<div class="container">
-    <!-- 数値表示エリア -->
-    <div class="display" id="result">00</div>
-    
-    <!-- 操作エリア -->
-    <div class="control">
-        <div class="soroban" id="soroban"></div>
-        <div class="buttons">
-            <button class="action_button reset" id="reset_button">C</button>
-            <button class="action_button enter" id="enter_button">✓</button>
-        </div>
-    </div>
-</div>
-
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    const display = document.getElementById("result");
-    const soroban = document.getElementById("soroban");
-
-    // そろばん作成
-    const beadRows = [];
-    const cols = 2;
-
-    for (let row = 0; row < 5; row++) {
-        let rowDiv = document.createElement("div");
-        rowDiv.style.display = "flex";
-        rowDiv.style.justifyContent = "center";
-        rowDiv.style.gap = "10px";
-
-        if (row === 1) { // 2行目の上に仕切り線
-            let separator = document.createElement("div");
-            separator.className = "separator";
-            soroban.appendChild(separator);
+    <script>
+        function toggleColor(button) {
+            if (button.classList.contains('blue')) {
+                button.classList.remove('blue');
+                button.classList.add('red');
+            } else {
+                button.classList.remove('red');
+                button.classList.add('blue');
+            }
         }
 
-        let beads = [];
-        for (let col = 0; col < cols; col++) {
-            let button = document.createElement("button");
-            button.classList.add("bead_button");
-            button.dataset.value = row === 0 ? "5" : "1";
-            button.classList.add(row === 0 ? "upper" : "lower");
-
-            rowDiv.appendChild(button);
-            beads.push(button);
-        }
-
-        soroban.appendChild(rowDiv);
-        beadRows.push(beads);
-    }
-
-    // ボタンの動作設定
-    function updateDisplay() {
-        let leftTotal = 0, rightTotal = 0;
-
-        beadRows.forEach((row, rowIndex) => {
-            row.forEach((bead, colIndex) => {
-                if (bead.classList.contains("on")) {
-                    let value = parseInt(bead.dataset.value);
-                    if (colIndex === 0) {
-                        leftTotal += value;
-                    } else {
-                        rightTotal += value;
-                    }
-                }
-            });
+        document.getElementById('button1').addEventListener('pointerdown', function(event) {
+            event.preventDefault();
+            toggleColor(this);
         });
 
-        let total = leftTotal * 10 + rightTotal;
-        display.textContent = total.toString().padStart(2, "0");
-    }
-
-    beadRows.forEach((row, rowIndex) => {
-        row.forEach(bead => {
-            new AlloyFinger(bead, {
-                tap: function() {
-                    if (rowIndex === 0) { 
-                        this.classList.toggle("on");
-                    } else {
-                        let isOn = this.classList.contains("on");
-                        if (!isOn) { // ONにする
-                            for (let i = 1; i <= rowIndex; i++) {
-                                beadRows[i].forEach(b => b.classList.add("on"));
-                            }
-                        } else { // OFFにする
-                            for (let i = rowIndex; i < beadRows.length; i++) {
-                                beadRows[i].forEach(b => b.classList.remove("on"));
-                            }
-                        }
-                    }
-                    updateDisplay();
-                }
-            });
+        document.getElementById('button2').addEventListener('pointerdown', function(event) {
+            event.preventDefault();
+            toggleColor(this);
         });
-    });
-
-    // リセットボタン
-    document.getElementById("reset_button").addEventListener("click", function() {
-        beadRows.forEach(row => row.forEach(bead => bead.classList.remove("on")));
-        updateDisplay();
-    });
-});
-</script>
-
+    </script>
 </body>
 </html>
