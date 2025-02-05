@@ -3,151 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>そろばん</title>
+    <title>Button Control</title>
     <style>
         body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: #f1f2f6;
-            font-family: sans-serif;
-        }
-        #area_num {
-            width: 120px;
-            height: 50px;
-            text-align: center;
-            font-size: 32px;
-            font-weight: bold;
-            color: black;
-            background-color: #f1f2f6;
-            margin-bottom: 10px;
-        }
-        #area_beads {
-            display: flex;
-        }
-        #area_main {
-            display: grid;
-            grid-template-columns: repeat(2, 50px);
-            grid-template-rows: repeat(5, 50px);
-            gap: 5px 0;
-        }
-        .button_main {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: none;
-            font-size: 16px;
-            font-weight: bold;
-            background-color: #f1f2f6;
-            box-shadow: inset 2px 2px 5px #ccc, inset -2px -2px 5px #fff;
-        }
-        .button_main.on {
-            box-shadow: inset -2px -2px 5px #ccc, inset 2px 2px 5px #fff;
-        }
-        .button_main.left.on:nth-child(1) {
-            background-color: #ff8080;
-        }
-        .button_main.left.on:nth-child(n+2) {
-            background-color: #ffbf80;
-        }
-        #area_utility {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-left: 20px;
-        }
-        .button_utility {
-            background-color: #80bfff;
+            background-color: black;
             color: white;
-            border: none;
-            font-size: 20px;
-            font-weight: bold;
             text-align: center;
+            font-family: Arial, sans-serif;
         }
-        #button_reset {
-            width: 50px;
-            height: 50px;
-            border-radius: 10px;
-            margin-bottom: 10px;
+        #counter {
+            font-size: 24px;
+            margin: 20px 0;
         }
-        #button_enter {
-            width: 50px;
-            height: 100px;
-            border-radius: 10px;
+        .button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: black;
+            border: 2px solid white;
+            display: block;
+            margin: 10px auto;
         }
     </style>
 </head>
 <body>
-    <div id="area_num">00</div>
-    <div id="area_beads">
-        <div id="area_main">
-            <script>
-                for (let i = 0; i < 10; i++) {
-                    let btn = document.createElement("button");
-                    btn.classList.add("button_main", i < 5 ? "left" : "right");
-                    btn.dataset.index = i;
-                    document.getElementById("area_main").appendChild(btn);
-                }
-            </script>
-        </div>
-        <div id="area_utility">
-            <button id="button_reset" class="button_utility">C</button>
-            <button id="button_enter" class="button_utility">✓</button>
-        </div>
+    <div id="counter">点灯値: 0</div>
+    <div id="buttons">
+        <button class="button" id="0"></button>
+        <button class="button" id="1"></button>
+        <button class="button" id="2"></button>
+        <button class="button" id="3"></button>
+        <button class="button" id="4"></button>
     </div>
     <script>
-        let activeTouches = {};
-        
-        document.querySelectorAll(".button_main").forEach(button => {
-            button.addEventListener("pointerdown", function(event) {
-                event.preventDefault();
-                let pointerId = event.pointerId;
-                activeTouches[pointerId] = this;
-                handleButtonToggle(this);
-            });
-            
-            button.addEventListener("pointerup", function(event) {
-                delete activeTouches[event.pointerId];
-            });
-        });
-        
-        document.getElementById("button_reset").addEventListener("pointerdown", event => {
-            event.preventDefault();
-            document.querySelectorAll(".button_main").forEach(b => b.classList.remove("on"));
-            updateNumber();
-        });
-        
-        function handleButtonToggle(button) {
-            let index = Number(button.dataset.index);
-            let left = button.classList.contains("left");
-            let buttons = Array.from(document.querySelectorAll(left ? ".button_main.left" : ".button_main.right"));
-            if (index % 5 === 0) {
-                button.classList.toggle("on");
-            } else {
-                let turnOn = !button.classList.contains("on");
-                buttons.forEach((btn, i) => {
-                    if (i >= 1 && i <= index % 5) {
-                        btn.classList.toggle("on", turnOn);
-                    }
-                });
+        document.addEventListener("DOMContentLoaded", function() {
+            const buttons = document.querySelectorAll(".button");
+            function updateCounter() {
+                let redCount = document.querySelectorAll(".button.red").length;
+                let yellowCount = document.querySelectorAll(".button.yellow").length;
+                document.getElementById("counter").textContent = "点灯値: " + (redCount * 5 + yellowCount * 1);
             }
-            updateNumber();
-        }
-        
-        function updateNumber() {
-            let num = 0;
-            document.querySelectorAll(".button_main.on").forEach(button => {
-                let index = Number(button.dataset.index);
-                if (index % 5 === 0) {
-                    num += (index < 5) ? 50 : 5;
+            
+            function updateColors(id, isTurningOn) {
+                if (id === 0) {
+                    let btn = document.getElementById("0");
+                    if (isTurningOn) {
+                        btn.classList.add("red");
+                        btn.style.backgroundColor = "red";
+                    } else {
+                        btn.classList.remove("red");
+                        btn.style.backgroundColor = "black";
+                    }
                 } else {
-                    num += (index < 5) ? 10 : 1;
+                    if (isTurningOn) {
+                        for (let i = id; i >= 1; i--) {
+                            let btn = document.getElementById(i.toString());
+                            btn.classList.add("yellow");
+                            btn.style.backgroundColor = "yellow";
+                        }
+                    } else {
+                        for (let i = id; i <= 4; i++) {
+                            let btn = document.getElementById(i.toString());
+                            btn.classList.remove("yellow");
+                            btn.style.backgroundColor = "black";
+                        }
+                    }
                 }
+                updateCounter();
+            }
+            
+            buttons.forEach(button => {
+                button.addEventListener("touchstart", function(event) {
+                    event.preventDefault();
+                    let id = parseInt(this.id);
+                    let isTurningOn = this.style.backgroundColor === "black";
+                    updateColors(id, isTurningOn);
+                });
+                
+                button.addEventListener("click", function() {
+                    let id = parseInt(this.id);
+                    let isTurningOn = this.style.backgroundColor === "black";
+                    updateColors(id, isTurningOn);
+                });
             });
-            document.getElementById("area_num").textContent = String(num).padStart(2, "0");
-        }
+        });
     </script>
 </body>
 </html>
