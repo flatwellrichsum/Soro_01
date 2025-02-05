@@ -31,7 +31,7 @@
     </style>
 </head>
 <body>
-    <div id="sumCounter">総計: 0</div>
+    <div id="sumCounter">0</div>
     <div id="columns">
         <div class="column" data-column="3">
             <button class="button" id="0-3"></button>
@@ -72,7 +72,7 @@
                     let N = (redCount * 5) + (yellowCount * 1);
                     sum += N * Math.pow(10, col);
                 }
-                document.getElementById("sumCounter").textContent = "総計: " + sum;
+                document.getElementById("sumCounter").textContent = sum;
             }
             
             function updateColors(id, column, isTurningOn) {
