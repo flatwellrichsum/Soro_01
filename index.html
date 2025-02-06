@@ -11,7 +11,20 @@
             text-align: center;
             font-family: Arial, sans-serif;
         }
-        #sumCounter {
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        height: 100vh;
+    }
+    .buttons {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 40px;
+    }
+            #sumCounter {
             font-size: 60px;
             color:#808080;
             margin: 20px 0;
@@ -69,7 +82,9 @@
     </style>
 </head>
 <body>
+<div class="container">
     <div id="sumCounter">0</div>
+        <div class="buttons">
     <div id="columns">
         <div class="column" data-column="3">
             <button class="button" id="0-3"></button>
@@ -104,6 +119,8 @@
             <button class="button_enter" id="enter"></button>
         </div>        
     </div>
+       </div>
+          </div>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -174,11 +191,6 @@
         document.getElementById("enter").addEventListener("click", resetAllButtons);
     });
 </script>
-
-
-
-
-
 
 </body>
 </html>
