@@ -3,164 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Button Interaction</title>
+    <title>Button Toggle UI</title>
     <style>
         body {
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             height: 100vh;
-            background-color: #E0E0E0;
+            background-color: #f0f0f0;
         }
         .container {
             display: flex;
         }
-        .buttons-column {
+        .buttons {
             display: flex;
             flex-direction: column;
         }
-        .button-wrapper {
+        .button-wrapper, .side-button {
             position: relative;
-            width: 100px;
+            width: 120px;
+            height: auto;
+            cursor: pointer;
         }
-        .button-overlay {
+        .button-wrapper img, .side-button img {
+            width: 120px;
+            height: auto;
+        }
+        .overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            cursor: pointer;
-        }
-        .side-buttons {
-            display: flex;
-            flex-direction: column;
-            margin-left: 20px;
-        }
-        .button-image, .side-button {
-            width: 100px;
-            height: auto;
-            display: block;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="buttons-column">
-            <div class="button-wrapper" id="btn0">
-                <img src="img/button_main_off.png" class="button-image">
-                <div class="button-overlay"></div>
-            </div>
-            <div class="button-wrapper" id="btn1">
-                <img src="img/button_main_off.png" class="button-image">
-                <div class="button-overlay"></div>
-            </div>
-            <div class="button-wrapper" id="btn2">
-                <img src="img/button_main_off.png" class="button-image">
-                <div class="button-overlay"></div>
-            </div>
-            <div class="button-wrapper" id="btn3">
-                <img src="img/button_main_off.png" class="button-image">
-                <div class="button-overlay"></div>
-            </div>
-            <div class="button-wrapper" id="btn4">
-                <img src="img/button_main_off.png" class="button-image">
-                <div class="button-overlay"></div>
-            </div>
+        <div class="buttons" id="main-buttons">
+            <div class="button-wrapper" data-id="0"><img src="img/button_main_off.png"><div class="overlay"></div></div>
+            <div class="button-wrapper" data-id="1"><img src="img/button_main_off.png"><div class="overlay"></div></div>
+            <div class="button-wrapper" data-id="2"><img src="img/button_main_off.png"><div class="overlay"></div></div>
+            <div class="button-wrapper" data-id="3"><img src="img/button_main_off.png"><div class="overlay"></div></div>
+            <div class="button-wrapper" data-id="4"><img src="img/button_main_off.png"><div class="overlay"></div></div>
         </div>
-        <div class="side-buttons">
-            <div class="button-wrapper" id="reload">
-                <img src="img/button_reload_off.png" class="side-button">
-                <div class="button-overlay"></div>
-            </div>
-            <div class="button-wrapper" id="check">
-                <img src="img/button_check_off.png" class="side-button">
-                <div class="button-overlay"></div>
-            </div>
+        <div class="buttons" id="side-buttons">
+            <div class="side-button" id="reload"><img src="img/button_reload_off.png"><div class="overlay"></div></div>
+            <div class="side-button" id="check"><img src="img/button_check_off.png"><div class="overlay"></div></div>
         </div>
     </div>
+    
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const buttons = document.querySelectorAll(".buttons-column .button-wrapper");
-            const reloadButton = document.getElementById("reload");
-            const checkButton = document.getElementById("check");
-            let N = 0;
-
-            function updateButtonImages() {
-                N = 0;
-                buttons.forEach((button, index) => {
-                    let img = button.querySelector(".button-image");
-                    let isOn = img.src.includes("button_main_on");
-                    if (isOn) {
-                        if (index > 0) {
-                            N += 1;
-                        }
+        document.querySelectorAll('.button-wrapper').forEach(button => {
+            button.addEventListener('click', toggleButton);
+            button.addEventListener('touchend', toggleButton);
+        });
+        
+        function toggleButton(event) {
+            event.preventDefault();
+            let id = parseInt(this.dataset.id);
+            let buttons = document.querySelectorAll('.button-wrapper');
+            let states = Array.from(buttons).map(b => b.querySelector('img').src.includes('_on_'));
+            
+            if (id === 0) {
+                states[0] = !states[0];
+            } else {
+                if (!states[id]) {
+                    for (let i = 1; i <= id; i++) {
+                        states[i] = true;
                     }
-                });
-                if (document.getElementById("btn0").querySelector(".button-image").src.includes("button_main_on")) {
-                    N += 5;
+                } else {
+                    for (let i = id; i < buttons.length; i++) {
+                        states[i] = false;
+                    }
                 }
-                buttons.forEach((button, index) => {
-                    let img = button.querySelector(".button-image");
-                    let isOn = img.src.includes("button_main_on");
-                    if (isOn) {
-                        img.src = `img/button_main_on_${String(N).padStart(2, '0')}.png`;
-                    } else {
-                        img.src = "img/button_main_off.png";
-                    }
-                });
             }
-
-            buttons.forEach(button => {
-                button.addEventListener("click", function () {
-                    let id = parseInt(this.id.replace("btn", ""));
-                    let img = this.querySelector(".button-image");
-                    let isOn = img.src.includes("button_main_on");
-
-                    if (id > 0) 
-                    {
-                        if (!isOn) {
-                            for (let i = 1; i <= id; i++) {
-                                let target = document.getElementById("btn" + i).querySelector(".button-image");
-                                target.src = `img/button_main_on_${String(N + 1).padStart(2, '0')}.png`;
-                            }
-                            img.src = `img/button_main_on_${String(N + 1).padStart(2, '0')}.png`;
-                        } else {
-                            for (let i = id; i < buttons.length; i++) {
-                                let target = document.getElementById("btn" + i).querySelector(".button-image");
-                                target.src = "img/button_main_off.png";
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (!isOn) {
-                            let target = document.getElementById("btn0").querySelector(".button-image");
-                            target.src = `img/button_main_on_${String(N + 1).padStart(2, '0')}.png`;
-                        } else {
-                            let target = document.getElementById("btn0").querySelector(".button-image");
-                            target.src = "img/button_main_off.png";
-                        }                    
-                    }
-                 
-                    updateButtonImages();
-                });
+            
+            let N = states.filter(s => s).length;
+            if (states[0]) N += 4;
+            
+            states.forEach((on, i) => {
+                buttons[i].querySelector('img').src = `img/button_main_${on ? `on_${String(N).padStart(2, '0')}` : 'off'}.png`;
             });
-
-            function setupSideButton(button, offSrc, onSrc) {
-                let img = button.querySelector(".side-button");
-                button.addEventListener("mousedown", function () {
-                    img.src = onSrc;
-                });
-                button.addEventListener("mouseup", function () {
-                    img.src = offSrc;
-                });
-                button.addEventListener("mouseleave", function () {
-                    img.src = offSrc;
-                });
-            }
-
-            setupSideButton(reloadButton, "img/button_reload_off.png", "img/button_reload_on.png");
-            setupSideButton(checkButton, "img/button_check_off.png", "img/button_check_on.png");
+        }
+        
+        document.querySelectorAll('.side-button').forEach(button => {
+            let img = button.querySelector('img');
+            let baseSrc = img.src;
+            let activeSrc = baseSrc.replace('_off', '_on');
+            
+            button.addEventListener('mousedown', () => img.src = activeSrc);
+            button.addEventListener('mouseup', () => img.src = baseSrc);
+            button.addEventListener('touchstart', () => img.src = activeSrc);
+            button.addEventListener('touchend', () => img.src = baseSrc);
         });
     </script>
 </body>
