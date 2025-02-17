@@ -3,100 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Button Toggle UI</title>
+    <title>Button Grid</title>
     <style>
         body {
+            text-align: center;
+            overflow: hidden;
+            margin: 0;
+            background-color: #404040;
+        }
+        .grid {
             display: flex;
-            align-items: center;
             justify-content: center;
-            height: 100vh;
-            background-color: #f0f0f0;
+            gap: 10px;
+            align-items: center;
         }
-        .container {
-            display: flex;
-        }
-        .buttons {
+        .column {
             display: flex;
             flex-direction: column;
         }
-        .button-wrapper, .side-button {
+        .button-container {
             position: relative;
-            width: 120px;
-            height: auto;
-            cursor: pointer;
+            width: 130px;
         }
-        .button-wrapper img, .side-button img {
-            width: 120px;
-            height: auto;
-        }
-        .overlay {
+        .button-container div {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
         }
+        .side-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-left: 20px;
+        }
+        #sum-display {
+            font-size: 100px;
+            margin-bottom: 10px;
+            color:#FFFFFF;
+        }
+        .separator {
+            height: 5px;
+            background-color: #D0D0D0;
+            width: 100%;
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="buttons" id="main-buttons">
-            <div class="button-wrapper" data-id="0"><img src="img/button_main_off.png"><div class="overlay"></div></div>
-            <div class="button-wrapper" data-id="1"><img src="img/button_main_off.png"><div class="overlay"></div></div>
-            <div class="button-wrapper" data-id="2"><img src="img/button_main_off.png"><div class="overlay"></div></div>
-            <div class="button-wrapper" data-id="3"><img src="img/button_main_off.png"><div class="overlay"></div></div>
-            <div class="button-wrapper" data-id="4"><img src="img/button_main_off.png"><div class="overlay"></div></div>
+    <div id="sum-display">0</div>
+    <div class="grid">
+        <div>
+            <div class="grid" id="top-button-grid"></div>
+            <div class="separator"></div>
+            <div class="grid" id="main-button-grid"></div>
         </div>
-        <div class="buttons" id="side-buttons">
-            <div class="side-button" id="reload"><img src="img/button_reload_off.png"><div class="overlay"></div></div>
-            <div class="side-button" id="check"><img src="img/button_check_off.png"><div class="overlay"></div></div>
+        <div class="side-buttons">
+            <img id="reload" src="img/button_reload_off.png" width="130" height="auto">
+            <img id="check" src="img/button_check_off.png" width="130" height="auto">
         </div>
     </div>
-    
     <script>
-        document.querySelectorAll('.button-wrapper').forEach(button => {
-            button.addEventListener('click', toggleButton);
-            button.addEventListener('touchend', toggleButton);
-        });
+        const columns = 4;
+        const rows = 5;
+        let sum = 0;
+        let states = Array.from({ length: columns }, () => Array(rows).fill(false));
+        const topGrid = document.getElementById("top-button-grid");
+        const mainGrid = document.getElementById("main-button-grid");
         
-        function toggleButton(event) {
-            event.preventDefault();
-            let id = parseInt(this.dataset.id);
-            let buttons = document.querySelectorAll('.button-wrapper');
-            let states = Array.from(buttons).map(b => b.querySelector('img').src.includes('_on_'));
-            
-            if (id === 0) {
-                states[0] = !states[0];
+        function updateSum() {
+            sum = 0;
+            for (let col = 0; col < columns; col++) {
+                let N = states[col].filter(state => state).length;
+                if (states[col][0]) N += 4;
+                sum += N * Math.pow(10, columns - col - 1);
+            }
+            document.getElementById("sum-display").textContent = sum;
+        }
+
+        function toggleButton(col, row) {
+            if (!states[col][row]) {
+                for (let i = 1; i <= row; i++) {
+                    states[col][i] = true;
+                }
+                states[col][row] = true;
             } else {
-                if (!states[id]) {
-                    for (let i = 1; i <= id; i++) {
-                        states[i] = true;
+                if (row > 0) {
+                    for (let i = row; i < rows; i++) {
+                        states[col][i] = false;
                     }
                 } else {
-                    for (let i = id; i < buttons.length; i++) {
-                        states[i] = false;
-                    }
+                    states[col][0] = !states[col][0];
                 }
             }
-            
-            let N = states.filter(s => s).length;
-            if (states[0]) N += 4;
-            
-            states.forEach((on, i) => {
-                buttons[i].querySelector('img').src = `img/button_main_${on ? `on_${String(N).padStart(2, '0')}` : 'off'}.png`;
-            });
+            updateImages();
+            updateSum();
         }
-        
-        document.querySelectorAll('.side-button').forEach(button => {
-            let img = button.querySelector('img');
-            let baseSrc = img.src;
-            let activeSrc = baseSrc.replace('_off', '_on');
+
+        function updateImages() {
+            for (let col = 0; col < columns; col++) {
+                let N = states[col].filter(state => state).length;
+                if (states[col][0]) N += 4;
+                let N_str = N.toString().padStart(2, '0');
+                for (let row = 0; row < rows; row++) {
+                    let img = document.getElementById(`button-${col}-${row}`);
+                    img.src = states[col][row] ? `img/button_main_on_${N_str}.png` : "img/button_main_off.png";
+                }
+            }
+        }
+
+        for (let col = 0; col < columns; col++) {
+            const topContainer = document.createElement("div");
+            topContainer.classList.add("column");
+            const mainContainer = document.createElement("div");
+            mainContainer.classList.add("column");
             
-            button.addEventListener('mousedown', () => img.src = activeSrc);
-            button.addEventListener('mouseup', () => img.src = baseSrc);
-            button.addEventListener('touchstart', () => img.src = activeSrc);
-            button.addEventListener('touchend', () => img.src = baseSrc);
-        });
+            // Top row (id=0)
+            const topButtonContainer = document.createElement("div");
+            topButtonContainer.classList.add("button-container");
+            const topImg = document.createElement("img");
+            topImg.src = "img/button_main_off.png";
+            topImg.width = 130;
+            topImg.id = `button-${col}-0`;
+            const topOverlay = document.createElement("div");
+            topOverlay.addEventListener("click", () => toggleButton(col, 0));
+            topOverlay.addEventListener("touchstart", (e) => { e.preventDefault(); toggleButton(col, 0); });
+            topButtonContainer.appendChild(topImg);
+            topButtonContainer.appendChild(topOverlay);
+            topContainer.appendChild(topButtonContainer);
+            topGrid.appendChild(topContainer);
+            
+            // Remaining rows (id>0)
+            for (let row = 1; row < rows; row++) {
+                const container = document.createElement("div");
+                container.classList.add("button-container");
+                const img = document.createElement("img");
+                img.src = "img/button_main_off.png";
+                img.width = 130;
+                img.id = `button-${col}-${row}`;
+                const overlay = document.createElement("div");
+                overlay.addEventListener("click", () => toggleButton(col, row));
+                overlay.addEventListener("touchstart", (e) => { e.preventDefault(); toggleButton(col, row); });
+                container.appendChild(img);
+                container.appendChild(overlay);
+                mainContainer.appendChild(container);
+            }
+            mainGrid.appendChild(mainContainer);
+        }
     </script>
 </body>
 </html>
