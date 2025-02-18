@@ -9,7 +9,7 @@
             text-align: center;
             overflow: hidden;
             margin: 0;
-            background-color: #808080;
+            background-color: #202020;
         }
         .grid {
             display: flex;
@@ -44,8 +44,8 @@
             color:#FFFFFF;
         }
         .separator {
-            height: 5px;
-            background-color: #D0D0D0;
+            height: 6px;
+            background-color: #808080;
             width: 100%;
             margin: 5px 0;
         }
@@ -151,6 +151,28 @@
             }
             mainGrid.appendChild(mainContainer);
         }
+        
+        function setupToggle(imgId, srcOn, srcOff) {
+            const img = document.getElementById(imgId);
+            img.addEventListener("mousedown", () => img.src = srcOn);
+            img.addEventListener("mouseup", () => img.src = srcOff);
+            img.addEventListener("mouseleave", () => img.src = srcOff);
+            img.addEventListener("touchstart", (e) => { e.preventDefault(); img.src = srcOn; });
+            img.addEventListener("touchend", () => img.src = srcOff);
+        }
+
+        setupToggle("reload", "img/button_reload_on.png", "img/button_reload_off.png");
+        setupToggle("check", "img/button_check_on.png", "img/button_check_off.png");
+
+        function resetButtons() {
+            states = Array.from({ length: columns }, () => Array(rows).fill(false));
+            updateImages();
+            updateSum();
+        }
+
+        document.getElementById("reload").addEventListener("click", resetButtons);
+        document.getElementById("check").addEventListener("click", resetButtons);
+        
     </script>
 </body>
 </html>
