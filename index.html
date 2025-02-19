@@ -25,6 +25,9 @@
             position: relative;
             width: 130px;
         }
+        .button-container img {
+            width: 130px;
+        }
         .button-container div {
             position: absolute;
             top: 0;
@@ -37,11 +40,13 @@
             flex-direction: column;
             gap: 10px;
             margin-left: 20px;
+            width: 130px;
         }
         #sum-display {
-            font-size: 100px;
+            font-family: 'Noto Sans', sans-serif;
+            font-weight: bold;            font-size: 100px;
             margin-bottom: 10px;
-            color:#FFFFFF;
+            color: #FFFFFF;
         }
         .separator {
             height: 6px;
@@ -60,119 +65,143 @@
             <div class="grid" id="main-button-grid"></div>
         </div>
         <div class="side-buttons">
-            <img id="reload" src="img/button_reload_off.png" width="130" height="auto">
-            <img id="check" src="img/button_check_off.png" width="130" height="auto">
+            <img id="reload" src="img/button_reload_off.png">
+            <img id="check" src="img/button_check_off.png">
         </div>
     </div>
     <script>
         const columns = 4;
         const rows = 5;
+        
         let sum = 0;
         let states = Array.from({ length: columns }, () => Array(rows).fill(false));
-        const topGrid = document.getElementById("top-button-grid");
-        const mainGrid = document.getElementById("main-button-grid");
         
-        function updateSum() {
-            sum = 0;
-            for (let col = 0; col < columns; col++) {
-                let N = states[col].filter(state => state).length;
-                if (states[col][0]) N += 4;
-                sum += N * Math.pow(10, columns - col - 1);
+        const topGrid    = document.getElementById("top-button-grid"),
+              mainGrid   = document.getElementById("main-button-grid"),
+              sumDisplay = document.getElementById("sum-display"),
+              reloadBtn  = document.getElementById("reload"),
+              checkBtn   = document.getElementById("check");
+              
+              
+        // 音を再生
+        function playSound(row)
+        {
+            const sounds = ["G", "C", "D", "E", "F"];
+            if (row >= 0 && row < sounds.length) {
+                let audio = new Audio(`se/${sounds[row]}.wav`);
+                audio.play();
             }
-            document.getElementById("sum-display").textContent = sum;
+        }
+  
+        // 合計を算出して sum に格納
+        function updateSum()
+        {
+            sum = states.reduce((acc, colStates, col) => {
+                let N = colStates.filter(Boolean).length;
+                if (colStates[0]) N += 4;
+                return acc + N * Math.pow(10, columns - col - 1); }, 0);
+            sumDisplay.textContent = sum;
         }
 
-        function toggleButton(col, row) {
-            if (!states[col][row]) {
-                for (let i = 1; i <= row; i++) {
-                    states[col][i] = true;
-                }
+        // ボタンのオンオフを管理
+        function toggleButton(col, row)
+        {
+            playSound(row);
+            if (!states[col][row])
+            {
+                for (let i = 1; i <= row; i++) states[col][i] = true;
                 states[col][row] = true;
-            } else {
-                if (row > 0) {
-                    for (let i = row; i < rows; i++) {
-                        states[col][i] = false;
-                    }
-                } else {
+            }
+            else
+            {
+                if (row === 0)
                     states[col][0] = !states[col][0];
-                }
+                else
+                    for (let i = row; i < rows; i++)
+                        states[col][i] = false;
             }
             updateImages();
             updateSum();
         }
 
-        function updateImages() {
-            for (let col = 0; col < columns; col++) {
-                let N = states[col].filter(state => state).length;
-                if (states[col][0]) N += 4;
+        // ボタンの画像を変える
+        function updateImages()
+        {
+            states.forEach((colStates, col) => {
+                let N = colStates.filter(Boolean).length;
+                if (colStates[0])
+                    N += 4;
                 let N_str = N.toString().padStart(2, '0');
-                for (let row = 0; row < rows; row++) {
-                    let img = document.getElementById(`button-${col}-${row}`);
-                    img.src = states[col][row] ? `img/button_main_on_${N_str}.png` : "img/button_main_off.png";
-                }
-            }
+                
+                colStates.forEach((state, row) => {
+                    document.getElementById(`button-${col}-${row}`).src = state ? `img/button_main_on_${N_str}.png` : "img/button_main_off.png";
+                });
+            });
         }
 
-        for (let col = 0; col < columns; col++) {
-            const topContainer = document.createElement("div");
-            topContainer.classList.add("column");
-            const mainContainer = document.createElement("div");
-            mainContainer.classList.add("column");
-            
-            // Top row (id=0)
-            const topButtonContainer = document.createElement("div");
-            topButtonContainer.classList.add("button-container");
-            const topImg = document.createElement("img");
-            topImg.src = "img/button_main_off.png";
-            topImg.width = 130;
-            topImg.id = `button-${col}-0`;
-            const topOverlay = document.createElement("div");
-            topOverlay.addEventListener("click", () => toggleButton(col, 0));
-            topOverlay.addEventListener("touchstart", (e) => { e.preventDefault(); toggleButton(col, 0); });
-            topButtonContainer.appendChild(topImg);
-            topButtonContainer.appendChild(topOverlay);
-            topContainer.appendChild(topButtonContainer);
-            topGrid.appendChild(topContainer);
-            
-            // Remaining rows (id>0)
-            for (let row = 1; row < rows; row++) {
-                const container = document.createElement("div");
-                container.classList.add("button-container");
-                const img = document.createElement("img");
-                img.src = "img/button_main_off.png";
-                img.width = 130;
-                img.id = `button-${col}-${row}`;
-                const overlay = document.createElement("div");
-                overlay.addEventListener("click", () => toggleButton(col, row));
-                overlay.addEventListener("touchstart", (e) => { e.preventDefault(); toggleButton(col, row); });
-                container.appendChild(img);
-                container.appendChild(overlay);
-                mainContainer.appendChild(container);
+        // ボタン作成
+        function createButton(col, row, parent)
+        {
+            const container = document.createElement("div");
+            container.classList.add("button-container");
+            const img = document.createElement("img");
+            img.src = "img/button_main_off.png";
+            img.id = `button-${col}-${row}`;
+            const overlay = document.createElement("div");
+            overlay.addEventListener("click", () => toggleButton(col, row));
+            overlay.addEventListener("touchstart", e => { e.preventDefault(); toggleButton(col, row); });
+            container.append(img, overlay);
+            parent.appendChild(container);
+        }
+
+        // ボタン配置
+        function arrangeButtons()
+        {
+            for (let col = 0; col < columns; col++)
+            {
+                const topContainer = document.createElement("div");
+                const mainContainer = document.createElement("div");
+
+                topContainer.classList.add("column");
+                mainContainer.classList.add("column");
+                createButton(col, 0, topContainer);
+                
+                for (let row = 1; row < rows; row++)
+                    createButton(col, row, mainContainer);
+                    
+                topGrid.appendChild(topContainer);
+                mainGrid.appendChild(mainContainer);
             }
-            mainGrid.appendChild(mainContainer);
         }
         
-        function setupToggle(imgId, srcOn, srcOff) {
-            const img = document.getElementById(imgId);
+        // ボタンのクリックとタッチを判別して実行
+        function setupToggle(img, srcOn, srcOff) {
             img.addEventListener("mousedown", () => img.src = srcOn);
             img.addEventListener("mouseup", () => img.src = srcOff);
             img.addEventListener("mouseleave", () => img.src = srcOff);
-            img.addEventListener("touchstart", (e) => { e.preventDefault(); img.src = srcOn; });
+            img.addEventListener("touchstart", e => { e.preventDefault(); img.src = srcOn; });
             img.addEventListener("touchend", () => img.src = srcOff);
         }
 
-        setupToggle("reload", "img/button_reload_on.png", "img/button_reload_off.png");
-        setupToggle("check", "img/button_check_on.png", "img/button_check_off.png");
-
+        // リセットボタン機能
         function resetButtons() {
-            states = Array.from({ length: columns }, () => Array(rows).fill(false));
+            states.forEach(col => col.fill(false));
             updateImages();
             updateSum();
         }
 
-        document.getElementById("reload").addEventListener("click", resetButtons);
-        document.getElementById("check").addEventListener("click", resetButtons);
-        
+        function main()
+        {
+            arrangeButtons();
+            
+            setupToggle(reloadBtn, "img/button_reload_on.png", "img/button_reload_off.png");
+            setupToggle(checkBtn, "img/button_check_on.png", "img/button_check_off.png");
+            
+            reloadBtn.addEventListener("click", resetButtons);
+            checkBtn.addEventListener("click", resetButtons);
+        }
+
+        main();    
     </script>
 </body>
 </html>
